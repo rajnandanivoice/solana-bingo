@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0b12" />
+  <title>Solana Bingo — 6th Birthday Edition</title>
+  <style>
+    :root{
+      --bg: #0b0b12;
+      --panel: rgba(255,255,255,0.05);
+      --panel2: rgba(255,255,255,0.07);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --border: rgba(255,255,255,0.12);
+      --shadow: 0 18px 60px rgba(0,0,0,0.55);
+      --radius: 18px;
+      --tileRadius: 16px;
+      --solPurple: #8b5cf6;
+      --solGreen: #22c55e;
+      --solCyan: #00ffa3;
+      --solMagenta: #dc1fff;
+      --selected: rgba(139, 92, 246, 0.22);
+      --selectedBorder: rgba(139, 92, 246, 0.55);
+      --focus: rgba(0,255,163,0.45);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      color: var(--text);
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(220,31,255,0.18), transparent 55%),
+                  radial-gradient(1000px 650px at 95% 25%, rgba(0,255,163,0.14), transparent 55%),
+                  radial-gradient(900px 600px at 40% 100%, rgba(139,92,246,0.12), transparent 55%),
+                  var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.35;
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 16px 64px;
+      position: relative;
+    }
+
+    header{
+      text-align: center;
+      margin-top: 8px;
+      margin-bottom: 18px;
+    }
+
+    h1{
+      margin: 0;
+      font-size: clamp(26px, 2.8vw, 38px);
+      letter-spacing: -0.02em;
+      font-weight: 780;
+    }
+
+    .subtitle{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: clamp(14px, 1.6vw, 16px);
+    }
+
+    .caption{
+      margin: 8px 0 0;
+      color: rgba(255,255,255,0.55);
+      font-size: 12.5px;
+    }
+
+    .accent{
+      background: linear-gradient(90deg, var(--solMagenta), var(--solCyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 10px 20px rgba(220,31,255,0.18));
+    }
+
+    .card{
+      margin: 18px auto 0;
+      padding: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .topRow{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .badges{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--solMagenta), var(--solCyan));
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+    }
+
+    .actions{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.28);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 120ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+    button:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+    }
+    button:active{
+      transform: translateY(0px);
+    }
+    button:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(0,255,163,0.14);
+      border-color: var(--focus);
+    }
+
+    .primary{
+      border-color: rgba(0,255,163,0.22);
+      background: linear-gradient(135deg, rgba(220,31,255,0.16), rgba(0,255,163,0.12));
+    }
+    .primary:hover{
+      border-color: rgba(0,255,163,0.32);
+      background: linear-gradient(135deg, rgba(220,31,255,0.20), rgba(0,255,163,0.16));
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tile{
+      min-height: 86px;
+      border-radius: var(--tileRadius);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 12px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      user-select: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 140ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+      will-change: transform;
+    }
+
+    .tile::before{
+      content:"";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(340px 160px at 20% 10%, rgba(220,31,255,0.18), transparent 50%),
+                  radial-gradient(340px 160px at 80% 80%, rgba(0,255,163,0.12), transparent 50%);
+      opacity: 0;
+      transition: opacity 200ms ease;
+      pointer-events: none;
+    }
+
+    .tile:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.34);
+    }
+    .tile:hover::before{ opacity: 1; }
+
+    .tile:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(0,255,163,0.14);
+      border-color: var(--focus);
+    }
+
+    .tile .text{
+      position: relative;
+      z-index: 1;
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.86);
+      letter-spacing: 0.01em;
+    }
+
+    .tile.selected{
+      background: var(--selected);
+      border-color: var(--selectedBorder);
+      box-shadow: 0 12px 32px rgba(139,92,246,0.18);
+    }
+
+    .tile.selected .text{
+      color: rgba(255,255,255,0.96);
+    }
+
+    .tile .check{
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.12);
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 160ms ease, transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      z-index: 2;
+    }
+    .tile.selected .check{
+      opacity: 1;
+      transform: scale(1);
+      border-color: rgba(139,92,246,0.60);
+      background: rgba(139,92,246,0.24);
+    }
+    .tile .check svg{
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: rgba(255,255,255,0.92);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tile.center{
+      cursor: default;
+      border-color: rgba(0,255,163,0.25);
+      background: linear-gradient(135deg, rgba(220,31,255,0.14), rgba(0,255,163,0.10));
+    }
+    .tile.center:hover{
+      transform: none;
+      box-shadow: none;
+    }
+
+    .tile.center .pill{
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,163,0.22);
+      background: rgba(0,0,0,0.24);
+      color: rgba(255,255,255,0.82);
+      z-index: 2;
+    }
+
+    .below{
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .counter{
+      display: grid;
+      gap: 4px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      min-width: 280px;
+    }
+    .counter .label{
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.66);
+    }
+    .counter .value{
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+    .counter .value strong{
+      font-size: 18px;
+    }
+
+    footer{
+      margin-top: 16px;
+      text-align: center;
+      color: rgba(255,255,255,0.55);
+      font-size: 12.5px;
+    }
+
+    .modalBackdrop{
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 16px;
+      background: rgba(0,0,0,0.58);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+    }
+    .modalBackdrop.open{ display: grid; }
+    .modal{
+      width: min(520px, 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+      box-shadow: 0 26px 90px rgba(0,0,0,0.6);
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .modal::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(520px 220px at 20% 10%, rgba(220,31,255,0.22), transparent 55%),
+                  radial-gradient(520px 220px at 90% 90%, rgba(0,255,163,0.16), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+    .modal > *{ position: relative; z-index: 1; }
+    .modal h2{
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .modal p{
+      margin: 0 0 14px;
+      color: rgba(255,255,255,0.75);
+      font-size: 13.5px;
+    }
+    .modalActions{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    #confettiCanvas{
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    @media (max-width: 560px){
+      .card{ padding: 14px; }
+      .grid{ gap: 9px; }
+      .tile{ min-height: 78px; padding: 10px; }
+      .tile .text{ font-size: 13px; }
+      .counter{ width: 100%; min-width: 0; }
+      .actions{ width: 100%; }
+      .actions button{ flex: 1; }
+      .below{ gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <div class="wrap">
+    <header>
+      <h1><span class="accent">Solana Bingo</span> — 6th Birthday Edition</h1>
+      <div class="subtitle">If you’ve experienced 5 of these, you’re an OG.</div>
+      <div class="caption">Click the squares. Screenshot your score.</div>
+    </header>
+
+    <main class="card" aria-label="Solana Bingo board">
+      <div class="topRow">
+        <div class="badges">
+          <div class="badge" title="Randomized every load">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="seedLabel">Fresh card</span>
+          </div>
+          <div class="badge" title="Center tile is always pre-checked">
+            Center: <span class="accent" style="font-weight:700;">Still here.</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="tweetBtn" class="primary" type="button">Tweet your score</button>
+          <button id="resetBtn" type="button">Reset Card</button>
+        </div>
+      </div>
+
+      <section id="grid" class="grid" role="grid" aria-label="Bingo grid"></section>
+
+      <div class="below">
+        <div class="counter" aria-live="polite">
+          <div class="label">How OG are you?</div>
+          <div class="value">
+            <strong id="scoreValue">1</strong>/25 — <span id="statusValue" class="accent">Tourist</span>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        Tip: Hit <span class="accent">Reset</span> for a new randomized card.
+      </footer>
+    </main>
+  </div>
+
+  <div id="modalBackdrop" class="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div class="modal">
+      <h2 id="modalTitle">Bingo. You survived Solana.</h2>
+      <p id="modalDesc">Screenshot it. Post it. Touch grass. Then come back and keep building.</p>
+      <div class="modalActions">
+        <button id="closeModalBtn" type="button">Close</button>
+        <button id="tweetBtn2" class="primary" type="button">Tweet this</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BINGO_ITEMS = [
+      "Solana is down again",
+      "Phantom wallet install",
+      "Used Jupiter",
+      "Bought a random memecoin",
+      "Bonk airdrop",
+      "NFT mint war",
+      "Used Magic Eden",
+      "Got rugged on Solana",
+      "LP’d on Raydium",
+      "Used Orca",
+      "Bridged to Solana",
+      "FTX collapse panic",
+      "SOL at $8",
+      "Anatoly “we keep building”",
+      "Used Anchor",
+      "Complained about RPC",
+      "Joined a Solana hackathon",
+      "Pump.fun token",
+      "Ape’d a coin at 3am",
+      "WIF mania",
+      "Bonk season",
+      "Argued about “Solana killers”",
+      "Used a burner wallet",
+      "Watched TPS debates"
+    ];
+
+    const CENTER_INDEX = 12; // 0..24, center of 5x5
+    const CENTER_TEXT = "Still here.";
+
+    const elGrid = document.getElementById("grid");
+    const elScore = document.getElementById("scoreValue");
+    const elStatus = document.getElementById("statusValue");
+    const elSeed = document.getElementById("seedLabel");
+    const elReset = document.getElementById("resetBtn");
+    const elTweet = document.getElementById("tweetBtn");
+    const elTweet2 = document.getElementById("tweetBtn2");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let tiles = []; // [{text, selected, isCenter}]
+    let bingoAlreadyFired = false;
+    let confetti = [];
+    let confettiRunning = false;
+    let confettiLastTs = 0;
+
+    function resizeCanvas(){
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+    }, { passive: true });
+
+    function shuffle(arr){
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildBoard(){
+      bingoAlreadyFired = false;
+      const stamp = new Date();
+      elSeed.textContent = "Fresh card · " + stamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      const picked = shuffle(BINGO_ITEMS).slice(0, 24);
+      tiles = new Array(25);
+      let p = 0;
+      for (let i = 0; i < 25; i++){
+        if (i === CENTER_INDEX){
+          tiles[i] = { text: CENTER_TEXT, selected: true, isCenter: true };
+        } else {
+          tiles[i] = { text: picked[p++], selected: false, isCenter: false };
+        }
+      }
+      renderGrid();
+      updateScoreAndStatus();
+    }
+
+    function renderGrid(){
+      elGrid.innerHTML = "";
+
+      for (let i = 0; i < tiles.length; i++){
+        const t = tiles[i];
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tile" + (t.selected ? " selected" : "") + (t.isCenter ? " center" : "");
+        btn.setAttribute("role", "gridcell");
+        btn.setAttribute("aria-pressed", String(!!t.selected));
+        btn.dataset.index = String(i);
+        btn.title = t.isCenter ? "Always checked" : "Click to toggle";
+
+        if (t.isCenter){
+          btn.tabIndex = 0;
+          const pill = document.createElement("div");
+          pill.className = "pill";
+          pill.textContent = "Free";
+          btn.appendChild(pill);
+        }
+
+        const check = document.createElement("div");
+        check.className = "check";
+        check.innerHTML = `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 6L9 17l-5-5"></path>
+          </svg>
+        `;
+
+        const text = document.createElement("div");
+        text.className = "text";
+        text.textContent = t.text;
+
+        btn.appendChild(check);
+        btn.appendChild(text);
+
+        btn.addEventListener("click", () => {
+          if (tiles[i].isCenter) return;
+          tiles[i].selected = !tiles[i].selected;
+          btn.classList.toggle("selected", tiles[i].selected);
+          btn.setAttribute("aria-pressed", String(!!tiles[i].selected));
+          updateScoreAndStatus();
+          maybeBingo();
+        });
+
+        elGrid.appendChild(btn);
+      }
+    }
+
+    function selectedCount(){
+      return tiles.reduce((acc, t) => acc + (t.selected ? 1 : 0), 0);
+    }
+
+    function statusForScore(score){
+      if (score <= 5) return "Tourist";
+      if (score <= 12) return "Regular";
+      if (score <= 20) return "Veteran";
+      return "Solana War Survivor";
+    }
+
+    function updateScoreAndStatus(){
+      const score = selectedCount();
+      elScore.textContent = String(score);
+      elStatus.textContent = statusForScore(score);
+    }
+
+    function hasBingo(){
+      const isSel = (idx) => !!tiles[idx]?.selected;
+      const lines = [];
+      // rows
+      for (let r = 0; r < 5; r++){
+        lines.push([0,1,2,3,4].map(c => r*5 + c));
+      }
+      // cols
+      for (let c = 0; c < 5; c++){
+        lines.push([0,1,2,3,4].map(r => r*5 + c));
+      }
+      // diagonals
+      lines.push([0,6,12,18,24]);
+      lines.push([4,8,12,16,20]);
+
+      return lines.some(line => line.every(isSel));
+    }
+
+    function maybeBingo(){
+      if (bingoAlreadyFired) return;
+      if (!hasBingo()) return;
+      bingoAlreadyFired = true;
+      openModal();
+      burstConfetti();
+    }
+
+    function openModal(){
+      modalBackdrop.classList.add("open");
+      closeModalBtn.focus({ preventScroll: true });
+    }
+
+    function closeModal(){
+      modalBackdrop.classList.remove("open");
+    }
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+    closeModalBtn.addEventListener("click", closeModal);
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalBackdrop.classList.contains("open")) closeModal();
+    });
+
+    function tweetText(){
+      const score = selectedCount();
+      const link = location.href || "[site link]";
+      return `I played Solana Bingo for the chain’s 6th birthday.\nMy OG score: ${score}/25\n\nTry it: ${link}`;
+    }
+
+    function openTweet(){
+      const text = tweetText();
+      const url = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text);
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    elTweet.addEventListener("click", openTweet);
+    elTweet2.addEventListener("click", openTweet);
+
+    elReset.addEventListener("click", () => {
+      buildBoard();
+    });
+
+    // Confetti (simple particle burst)
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+
+    function burstConfetti(){
+      resizeCanvas();
+
+      const colors = [
+        "#dc1fff", // magenta
+        "#00ffa3", // solana green
+        "#8b5cf6", // purple
+        "#22c55e", // green
+        "#a78bfa", // light purple
+        "#6ee7b7"  // mint
+      ];
+
+      const count = 160;
+      const originX = window.innerWidth * 0.5;
+      const originY = Math.min(window.innerHeight * 0.28, 220);
+
+      confetti = [];
+      for (let i = 0; i < count; i++){
+        const angle = rand(-Math.PI * 0.92, -Math.PI * 0.08);
+        const speed = rand(4.2, 9.4);
+        confetti.push({
+          x: originX + rand(-12, 12),
+          y: originY + rand(-10, 10),
+          vx: Math.cos(angle) * speed + rand(-0.6, 0.6),
+          vy: Math.sin(angle) * speed + rand(-0.8, 0.2),
+          g: rand(0.12, 0.20),
+          w: rand(6, 11),
+          h: rand(6, 14),
+          r: rand(0, Math.PI),
+          vr: rand(-0.18, 0.18),
+          a: 1,
+          va: rand(0.006, 0.012),
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+
+      confettiRunning = true;
+      confettiLastTs = performance.now();
+      requestAnimationFrame(tickConfetti);
+    }
+
+    function tickConfetti(ts){
+      if (!confettiRunning) return;
+      const dt = Math.min(24, ts - confettiLastTs);
+      confettiLastTs = ts;
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      let alive = 0;
+      for (const p of confetti){
+        p.vy += p.g * (dt / 16);
+        p.x += p.vx * (dt / 16);
+        p.y += p.vy * (dt / 16);
+        p.r += p.vr * (dt / 16);
+        p.a = Math.max(0, p.a - p.va * (dt / 16));
+
+        // a little drag
+        p.vx *= 0.995;
+        p.vy *= 0.999;
+
+        if (p.a <= 0 || p.y > window.innerHeight + 40) continue;
+        alive++;
+
+        ctx.save();
+        ctx.globalAlpha = p.a;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.r);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      }
+
+      if (alive === 0){
+        confettiRunning = false;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        return;
+      }
+      requestAnimationFrame(tickConfetti);
+    }
+
+    // Init
+    resizeCanvas();
+    buildBoard();
+  </script>
+</body>
+</html>
+
